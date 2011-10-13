@@ -1,0 +1,17 @@
+pick 3 [3,2,5,3,(-5),4,3,2] == [3,3,3]
+pick (-7) [3,2,5,3,(-5),4,3,2] == []
+pick 2 [3,2,5,3,(-5),4,3,2] == [2,2]
+
+pickAll [3,2,5] [3,2,5,3,(-5),4,3,2] == [3,2,5,3,3,2]
+pickAll [(-7),5] [3,2,5,3,(-5),4,3,2] == [5]
+pickAll [] [3,2,5,3,(-5),4,3,2] == []
+
+variations 6 3 == 120
+variations 6 9 == (-1)
+variations 6 (-2) == (-1)
+
+numberOfOcc 'a' "Banane" == 2
+numberOfOcc 'b' "Banane" == 0
+numberOfOcc 'B' "Banane" == 1
+
+mostCommonSymbol "Bananen" == 'n'
