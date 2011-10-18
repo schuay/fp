@@ -4,8 +4,8 @@
  - Returns all elements of the list (second argument), which are
  - equal to the Integer (first argument).
  -}
-pick :: Integer -> [Integer] -> [Integer]
-pick n l = [ x | x <- l, x == n]
+pick :: (Eq a) => a -> [a] -> [a]
+pick n l = filter ((==) n) l
 
 -- 2
 
@@ -13,8 +13,8 @@ pick n l = [ x | x <- l, x == n]
  - Returns the elements of the second argument, which are also present
  - int the first.
  -}
-pickAll :: [Integer] -> [Integer] -> [Integer]
-pickAll l1 l2 = [ x | x <-l2, elem x l1 ]
+pickAll :: (Eq a) => [a] -> [a] -> [a]
+pickAll l1 l2 = filter (\x -> elem x l1) l2
 
 -- 3
 
@@ -25,42 +25,35 @@ pickAll l1 l2 = [ x | x <-l2, elem x l1 ]
  -}
 variations :: Integer -> Integer -> Integer
 variations n r
-         | r < 0 || n < r = -1
-         | n == r + 1 = n
-         | otherwise = n * variations (n - 1) r
+    | r < 0 || n < r = -1
+    | otherwise = foldr (*) 1 [n,n - 1 .. lim]
+    where lim = r + 1
 
 -- 4
-
-type Symbol = Char
-type Text = String
-type NumberOf = Integer
 
 {-|numberOfOcc:
  - Counts the number of occurences of the symbol (first argument) in
  - the Text (second argument).
  -}
-numberOfOcc :: Symbol -> Text -> NumberOf
-numberOfOcc _ [] = 0
-numberOfOcc c (x:xs)
-    | c == x = 1 + numberOfOcc c xs
-    | otherwise = numberOfOcc c xs
+numberOfOcc :: (Eq a) => a -> [a] -> Int
+numberOfOcc n = length . (pick n)
 
 -- 5
 
 {-|delOne:
  - Deletes the last occurence of every symbol in a Text.
  -}
-delOne :: Text -> Text
+delOne :: (Eq a) => [a] -> [a]
 delOne [] = []
 delOne (x:xs)
-     | elem x xs = x : delOne xs
-     | otherwise = delOne xs
+    | elem x xs = x : delOne xs
+    | otherwise = delOne xs
 
 {-|mostCommonSymbol:
  - Returns the most common symbol in a Text or calls 'error' if no
  - such symbol exists.
  -}
-mostCommonSymbol :: Text -> Symbol
+mostCommonSymbol :: (Eq a) => [a] -> a
 mostCommonSymbol [] = error "kein Resultat"
 mostCommonSymbol (x:[]) = x
 mostCommonSymbol x = (mostCommonSymbol . delOne) x
