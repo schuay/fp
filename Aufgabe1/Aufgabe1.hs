@@ -27,7 +27,7 @@ variations :: Integer -> Integer -> Integer
 variations n r
     | r < 0 || n < r = -1
     | otherwise = foldr (*) 1 [n,n - 1 .. lim]
-    where lim = r + 1
+    where lim = n - r + 1
 
 -- 4
 
