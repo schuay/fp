@@ -65,6 +65,7 @@ suche haystack needle
  - Searching for "aba" in "ababa" returns [0] -}
 recursiveFind :: Index -> Editor -> Suchzeichenreihe -> [Index]
 recursiveFind _ [] _ = []
+recursiveFind _ _ [] = []
 recursiveFind pos haystack needle
     | needle `matches` haystack = pos : (recursiveFind nextPos nextHaystack needle)
     | otherwise = recursiveFind (succ pos) (drop 1 haystack) needle
