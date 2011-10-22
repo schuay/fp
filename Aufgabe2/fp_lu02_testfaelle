@@ -1,0 +1,33 @@
+-- 1.
+istPrimal (-1) == False
+istPrimal 1377 == False
+istPrimal 41 == True
+
+-- 2.
+faktorisiere 2 --> Program error: Unzulaessig
+faktorisiere 13 == []
+faktorisiere 1377 == [(9,153),(17,81),(81,17),(153,9)]
+
+-- 3.
+suche "Sein oder Nichtsein, das ist hier die Frage." "ei" == 1
+suche "Sein oder Nichtsein, das ist hier die Frage." "sein" == 15
+suche "Sein oder Nichtsein, das ist hier die Frage." "seit" == (-1)
+suche "Sein oder Nichtsein, das ist hier die Frage." "Ei" == (-1)
+
+-- 4.
+sucheAlle "Sein oder Nichtsein, das ist hier die Frage." "ei" == [1,16]
+sucheAlle "Sein oder Nichtsein, das ist hier die Frage." "sein" == [15]
+sucheAlle "Sein oder Nichtsein, das ist hier die Frage." "seit" == []
+sucheAlle "Mississippi." "issi" == [1]
+sucheAlle "Mississippi." "ppii" == []
+sucheAlle "aaaaaa" "aa" == [0,2,4]
+
+-- 5.
+son = "Sein oder Nichtsein." :: String
+ersetze son 2 "ein" "" == "Sein oder Nichts."
+ersetze son 2 "sein" "mein" == son
+ersetze son 1 "sein" "mein" == "Sein oder Nichtmein."
+ersetze son (-3) "ei" "mein" == "Sein oder Nichtsein."
+ersetze "Mississippi." 1 "issi" "abc" == "Mabcssippi."
+ersetze "Mississippi." 2 "issi" "abc" == "Mississippi."
+ersetze "aaaaaa" 2 "aa" "bb" == "aabbaa"
