@@ -52,7 +52,7 @@ matches :: Suchzeichenreihe -> Editor -> Bool
 matches needle haystack = needle == (take (length needle) haystack)
 
 {- Returns the index of the first found element or -1 if not found -}
-suche :: Suchzeichenreihe -> Editor -> Index
+suche :: Editor -> Suchzeichenreihe -> Index
 suche haystack needle
     | indexList == [] = (-1)
     | otherwise = head indexList
@@ -76,7 +76,7 @@ recursiveFind pos haystack needle
 
 {- Wrapper function for recursiveFind; returns all indices of found
  - instances of needle in haystack -}
-sucheAlle :: Suchzeichenreihe -> Editor -> [Index]
+sucheAlle :: Editor -> Suchzeichenreihe -> [Index]
 sucheAlle = recursiveFind 0
 
 -- 5
