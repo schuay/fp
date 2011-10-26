@@ -23,11 +23,11 @@ matches "bc" "abcde" == False
 matches "abc" "abcde" == True
 matches "ab" "a" == False
 matches "a" "" == False
-matches "" "a" == True
+matches "" "a" == False
 
 suche "abcde" "abcdef" == (-1)
 suche "abcde" "def" == (-1) 
-suche "abcde" "" == 0
+suche "abcde" "" == (-1)
 suche "" "" == (-1) -- is this correct? 
 suche "abcde" "cde" == 2
 

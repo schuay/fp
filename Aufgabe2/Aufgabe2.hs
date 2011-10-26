@@ -49,6 +49,7 @@ type Neu = String
 
 {- Returns whether the beginning of haystack matches needle -}
 matches :: Suchzeichenreihe -> Editor -> Bool
+matches "" _ = False
 matches needle haystack = needle == (take (length needle) haystack)
 
 {- Returns the index of the first found element or -1 if not found -}
