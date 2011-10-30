@@ -49,7 +49,7 @@ type Neu = String
 
 {- Returns whether the beginning of haystack matches needle -}
 matches :: Suchzeichenreihe -> Editor -> Bool
-matches "" _ = False
+--matches "" _ = False
 matches needle haystack = needle == (take (length needle) haystack)
 
 {- Returns the index of the first found element or -1 if not found -}
@@ -65,15 +65,16 @@ suche haystack needle
 {- Returns all indices of found instances of needle in haystack.
  - Searching for "aba" in "ababa" returns [0] -}
 recursiveFind :: Index -> Editor -> Suchzeichenreihe -> [Index]
+recursiveFind pos [] [] = [pos]
 recursiveFind _ [] _ = []
-recursiveFind _ _ [] = []
+--recursiveFind _ _ [] = []
 recursiveFind pos haystack needle
     | needle `matches` haystack = pos : (recursiveFind nextPos nextHaystack needle)
     | otherwise = recursiveFind (succ pos) (drop 1 haystack) needle
     where
     needleLen = toInteger (length needle)
-    nextPos = pos + needleLen
-    nextHaystack = drop (length needle) haystack
+    nextPos = pos + (max 1 needleLen)
+    nextHaystack = drop (max 1 (length needle)) haystack
 
 {- Wrapper function for recursiveFind; returns all indices of found
  - instances of needle in haystack -}
