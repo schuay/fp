@@ -13,7 +13,7 @@ Takes a list of lines and returns the length of the longest line.
 > longestLine :: [[a]] -> Int
 > longestLine line = maximum $ map length line
 
-Pads a line to a specific length with zeroes (0).
+Pads a line to len with fill.
 
 > pad :: Int -> a -> [a] -> [a]
 > pad len fill list
