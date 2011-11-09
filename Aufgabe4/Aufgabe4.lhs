@@ -69,8 +69,9 @@ the provided Typung_mw specification. Passing a negative n results in
 error "unzulaessig".
 
 > identity :: Integer -> Matrix
-> identity 0 = error "unzulaessig"
-> identity m = map identityRow [0 .. mInt - 1]
+> identity m
+>   | m < 1 = error "unzulaessig"
+>   | otherwise = map identityRow [0 .. mInt - 1]
 >   where
 >   identityRow n = replicate n 0 ++ [1] ++ replicate (mInt - 1 - n) 0
 >   mInt = fromIntegral m
@@ -132,8 +133,9 @@ the given value.
 Returns a normed (anp2) and then transposed matrix.
 
 > transp :: [[Integer]] -> Zeilen -> Spalten -> Fuellwert -> Matrix
-> transp _ _ 0 _ = error "unzulaessig"
-> transp input rows cols fill = [ transpR row | row <- [0 .. cols - 1] ]
+> transp input rows cols fill
+>   | cols < 1 = error "unzulaessig"
+>   | otherwise = [ transpR row | row <- [0 .. cols - 1] ]
 >   where
 >   matrix = anp2 input rows cols fill
 >   transpR row = [ x !! (fromIntegral row) | x <- matrix ]
