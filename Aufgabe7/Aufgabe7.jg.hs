@@ -133,7 +133,7 @@ nextStates (AMg t) ss w = [i | (i,j) <- indexedRow, elem (head w) j]
  - and accepting states as. -}
 
 accept :: Eq a => (Automaton a) -> StartState -> AcceptingStates -> (Word a) -> Bool
-accept _ ss as [] = ss `elem` as
+accept (AMg m) ss as [] = ss `elem` as && ss `elem` [0..fromIntegral $ length m - 1]
 accept t@(AMg m) ss as w
     | ss < 0 || ss >= (fromIntegral $ length m) = False
     | otherwise = or $ map accept' (nextStates t ss w)
