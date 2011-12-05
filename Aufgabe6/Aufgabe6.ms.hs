@@ -24,12 +24,9 @@ flatten (BNode n l r) GPostfix = [n] ++ (flatten r GPostfix) ++ (flatten l GPost
  -}
 isST :: BTree -> Bool
 isST Nil = True
-isST (BNode n l r) = (isSTSub l (<n)) && (isSTSub r (>n))
--- f is needed to determine whether n is larger/smaller than the parent's.
--- We need this since we don't know if we are working on the left or right child.
-  where isSTSub :: BTree -> (Int -> Bool) -> Bool
-        isSTSub Nil _ = True
-	isSTSub (BNode n l r) f = (f n) && (isSTSub l (<n)) && (isSTSub r (>n))
+isST n = sorted $ flatten n Infix
+  where sorted (x:y:ys) = x < y && sorted (y:ys)
+        sorted _ = True
 
 -- 3
 
