@@ -22,10 +22,9 @@ flatten n GPostfix = reverse $ flatten n Postfix
 
 isST :: BTree -> Bool
 isST Nil = True
-isST n = sorted $ flatten n Infix
+isST n = and $ zipWith (<) flattened (tail flattened)
     where
-    sorted (x:y:ys) = x < y && sorted (y:ys)
-    sorted _ = True
+    flattened = flatten n Infix
 
 {- 3 -}
 
