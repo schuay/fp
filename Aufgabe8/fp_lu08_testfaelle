@@ -1,0 +1,47 @@
+
+-- Testfaelle zu Aufgabenblatt 8
+
+-- Testfaelle zu Aufgabenteilen 1 und 2
+
+testall = and [b1_t1, b1_t2, b2_t1, b2_t2, b3_t1, b3_t2, b4_t1, b4_t2, b4_t3]
+
+b1_a1 = (AMg [(["de","a","c","b"]),(["de","a","c","b"]),(["de","a","c",""]),(["de","a","","b"])])
+-- alle woerter ueber {a,b,c,d,e}*, die weder bc noch cb enthalten, und nicht mit einem "a" enden
+
+-- zustand 0 "keine gefahr"
+-- zustand 1 "a ist am ende"
+-- zustand 2 "Gefahr, cb zu generieren"
+-- zustand 3 "Gefahr, bc zu generieren"
+
+-- start: 0
+-- end:   0,2,3
+
+b1_t1 = isPostfix b1_a1 0 [0,2,3] "ab" == True
+b1_t2 = isPostfix b1_a1 0 [0,2,3] "aba" == False
+
+-- Beachten Sie, dass das Resultat i.a. nicht eindeutig festgelegt ist
+b2_t1 = givePrefix b1_a1 0 [0,2,3] "ab" == (Just "a")
+b2_t2 = givePrefix b1_a1 0 [0,2,3] "aba" == Nothing
+
+
+
+-- Testfaelle zu Aufgabenteil 3
+ 
+t2a_t1 = isValid [1, 50, 30, 10, 40, 20, 3] == True
+t2a_t2 = isValid [2, 50, 30, 10, 40, 20, 3] == False
+t2a_t3 = isValid [1, 60, 30, 10, 40, 20, 3] == False
+
+t2b_t1 = computeVisibility [50, 30, 10, 40, 20] == [1, 50, 30, 10, 40, 20, 3]
+t2b_t2 = computeVisibility [10,20..50] == 5:[10,20..50]++[1]
+
+-- Beachten Sie, dass das Resultat i.a. nicht eindeutig festgelegt ist
+t2c_t1 = buildSkyscrapers 5 1 5 == Just [1,50,40,30,20,10,5]
+t2c_t2 = buildSkyscrapers 5 5 5 == Nothing
+
+t2d_t1 = noOfSkyscraperLines 4 2 2 == 6
+t2d_t2 = noOfSkyscraperLines 5 5 5 == 0
+
+t2e_t1 = allSkyscraperLines 5 1 5 == [[1,50,40,30,20,10,5]]
+t2e_t2 = allSkyscraperLines 4 2 2 == [[2,10,40,20,30,2],[2,20,10,40,30,2],[2,20,40,10,30,2],[2,30,10,40,20,2],[2,30,20,40,10,2],[2,30,40,10,20,2]]
+
+

@@ -46,6 +46,6 @@ isValid i5 == False
 (length $ scraperPerms 4) == 24
 (length $ scraperPerms 5) == 120
 
-s1 `elem` (allSkyscraperLines 3 1 1)
+s1 `elem` (allSkyscraperLines 3 1 2)
 s2 `elem` (allSkyscraperLines 2 1 2)
-s3 `elem` (allSkyscraperLines 5 1 2)
+s3 `elem` (allSkyscraperLines 5 1 3)

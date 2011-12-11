@@ -18,9 +18,9 @@ auto = AMg [["dea","a","ca","ba","",""],["de","a","c","b","",""],
 
 {- Test skyscraper lines -}
 
-s1 = [1,30,10,20,1]
+s1 = [1,30,10,20,2]
 s2 = [1,20,10,2]
-s3 = [1,50,30,10,40,20,2]
+s3 = [1,50,30,10,40,20,3]
 
 i1 = [1,1]
 i2 = [2,20,10,2]
@@ -158,8 +158,9 @@ isValid s = length s > 2 && heightsValid s &&
  - list *without* visibility information -}
 
 computeVisFromLeft :: Skyscraperline -> VisFromLeft
-computeVisFromLeft s = 1 + (fromIntegral $ length $ takeWhile id $
-                       zipWith (<) s (tail s))
+computeVisFromLeft s = visFromLeft' s 0
+    where visFromLeft' (x:xs) mx = visFromLeft' xs (max x mx) +  if x > mx then 1 else 0
+          visFromLeft' _ _ = 0
 
 computeVisFromRight :: Skyscraperline -> VisFromRight
 computeVisFromRight = computeVisFromLeft . reverse
@@ -189,7 +190,7 @@ allSkyscraperLines len l r = filter (\x -> head x == l &&  last x == r) $
 
 buildSkyscrapers :: Length -> VisFromLeft -> VisFromRight -> Maybe Skyscraperline
 buildSkyscrapers len l r
-    | len < 1 || l + r > len = Nothing
+    | len < 1 = Nothing
     | length candidates == 0 = Nothing
     | otherwise = Just $ head candidates 
     where candidates = allSkyscraperLines len l r
