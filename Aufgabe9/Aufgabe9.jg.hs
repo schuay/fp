@@ -40,19 +40,19 @@ stripVisibility = (map mid) . mid
 
 {- Takes a skyline, returns whether the size is valid. -}
 
-isValidSize :: Skyline -> Bool
-isValidSize m = a > 2 && b > 2
+isValidSLSize :: Skyline -> Bool
+isValidSLSize m = a > 2 && b > 2
     where (a,b) = dim m
 
 {- Takes a bare skyline row of valid size,
  - returns whether it contains all values. -}
 
-isValidLine :: Row -> Bool
-isValidLine r = and $ zipWith (==) values (sort r)
+isValidSLLine :: Row -> Bool
+isValidSLLine r = and $ zipWith (==) values (sort r)
     where values = map (* 10) [ 1 .. ]
 
 allLinesValid :: Skyline -> Bool
-allLinesValid m = and $ map isValidLine allLines
+allLinesValid m = and $ map isValidSLLine allLines
     where allLines = (allRows s) ++ (allCols s)
           s = stripVisibility m
 
@@ -89,8 +89,8 @@ standardize m = [ standardize' $ head m ] ++ (mid m) ++
  - and all visibility infos are correct. Returns true if all conditions
  - are satisfied, else false. -}
 
-isValid :: Skyline -> Bool
-isValid m = and [ isValidSize m,
+isValidSL :: Skyline -> Bool
+isValidSL m = and [ isValidSLSize m,
                   allLinesValid m,
                   (standardize m) == (compVisibility (stripVisibility m)) ]
 
@@ -128,7 +128,7 @@ data Variant = Basic | Cross | Color deriving (Eq,Show)
  - Cross: Basic + in both diagonals
  - Color: Basic + in each position of subsquares -}
 
--- isValid :: Sudoku -> Variant -> Bool
+-- isValidSDK :: Sudoku -> Variant -> Bool
 
 {- 2b -}
 

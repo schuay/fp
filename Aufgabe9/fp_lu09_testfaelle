@@ -5,12 +5,12 @@ Testfaelle zu Aufgabenblatt 9
 
 -- a)
 
-isValid [[0,5,4,3,2,1,0],[5,10,20,30,40,50,1],[4,20,30,40,50,10,2],[3,30,40,50,10,20,2],[2,40,50,10,20,30,2],[1,50,10,20,30,40,2],[0,1,2,2,2,2,0]] == True
-isValid [[1,5,4,3,2,1,0],[5,10,20,30,40,50,1],[4,20,30,40,50,10,2],[3,30,40,50,10,20,2],[2,40,50,10,20,30,2],[1,50,10,20,30,40,2],[0,1,2,2,2,2,0]] == True
-isValid [[0,6,4,3,2,1,0],[5,10,20,30,40,50,1],[4,20,30,40,50,10,2],[3,30,40,50,10,20,2],[2,40,50,10,20,30,2],[1,50,10,20,30,40,2],[0,1,2,2,2,2,0]] == False
-isValid [[0,5,4,3,2,1,0],[5,10,20,30,40,50,1],[4,20,30,40,50,10,2],[3,30,40,50,20,20,2],[2,40,50,10,20,30,2],[1,50,10,20,30,40,2],[0,1,2,2,2,2,0]] == False
-isValid [[0,5,4,3,2,1,0],[5,10,20,30,40,50,1],[4,20,30,50,10,2],[3,30,40,50,10,20,2],[2,40,50,10,20,30,2],[1,50,10,20,30,40,2],[0,1,2,2,2,2,0]] == False
-isValid [] == False
+isValidSL [[0,5,4,3,2,1,0],[5,10,20,30,40,50,1],[4,20,30,40,50,10,2],[3,30,40,50,10,20,2],[2,40,50,10,20,30,2],[1,50,10,20,30,40,2],[0,1,2,2,2,2,0]] == True
+isValidSL [[1,5,4,3,2,1,0],[5,10,20,30,40,50,1],[4,20,30,40,50,10,2],[3,30,40,50,10,20,2],[2,40,50,10,20,30,2],[1,50,10,20,30,40,2],[0,1,2,2,2,2,0]] == True
+isValidSL [[0,6,4,3,2,1,0],[5,10,20,30,40,50,1],[4,20,30,40,50,10,2],[3,30,40,50,10,20,2],[2,40,50,10,20,30,2],[1,50,10,20,30,40,2],[0,1,2,2,2,2,0]] == False
+isValidSL [[0,5,4,3,2,1,0],[5,10,20,30,40,50,1],[4,20,30,40,50,10,2],[3,30,40,50,20,20,2],[2,40,50,10,20,30,2],[1,50,10,20,30,40,2],[0,1,2,2,2,2,0]] == False
+isValidSL [[0,5,4,3,2,1,0],[5,10,20,30,40,50,1],[4,20,30,50,10,2],[3,30,40,50,10,20,2],[2,40,50,10,20,30,2],[1,50,10,20,30,40,2],[0,1,2,2,2,2,0]] == False
+isValidSL [] == False
 
 -- b)
 
@@ -57,7 +57,7 @@ let skyline9_nok = [[0,2,2,3,1,3,0],[2,40,20,10,0,30,2],[1,50,10,40,30,20,4],[2,
 -- a)
 testsV = [skyline1_ok, skyline2_ok, skyline6_nok, skyline7_nok, skyline8_nok, skyline9_nok]
 
-testValid = (map (isValid) testsV) == [True, True, False, False, False, False]
+testValid = (map (isValidSL) testsV) == [True, True, False, False, False, False]
 
 
 -- b)
@@ -203,20 +203,20 @@ color_inv1   = [[0,0,3,4,5,0,0,0,0],
 
 -- 2.a
 
-t_val1 = (isValid basic_start1 Basic) == True
-t_val2 = (isValid basic_start2 Basic) == True
-t_val3 = (isValid basic_start3 Basic) == True
-t_val4 = (isValid cross_start1 Cross) == True
-t_val5 = (isValid cross_start2 Cross) == True
-t_val6 = (isValid color_start1 Color) == True
-t_val7 = (isValid color_start2 Color) == True
-t_val8 = (isValid basic_inv1 Basic) == False
-t_val9 = (isValid basic_inv2 Basic) == False
-t_val10 = (isValid cross_inv1 Cross) == False
-t_val11 = (isValid color_inv1 Color) == False
+t_val1 = (isValidSDK basic_start1 Basic) == True
+t_val2 = (isValidSDK basic_start2 Basic) == True
+t_val3 = (isValidSDK basic_start3 Basic) == True
+t_val4 = (isValidSDK cross_start1 Cross) == True
+t_val5 = (isValidSDK cross_start2 Cross) == True
+t_val6 = (isValidSDK color_start1 Color) == True
+t_val7 = (isValidSDK color_start2 Color) == True
+t_val8 = (isValidSDK basic_inv1 Basic) == False
+t_val9 = (isValidSDK basic_inv2 Basic) == False
+t_val10 = (isValidSDK cross_inv1 Cross) == False
+t_val11 = (isValidSDK color_inv1 Color) == False
 
 
-test_isValid = and [t_val1,t_val2,t_val3,t_val4,t_val5,t_val6,t_val7,
+test_isValidSDK = and [t_val1,t_val2,t_val3,t_val4,t_val5,t_val6,t_val7,
                     t_val8,t_val9,t_val10,t_val11]
 
 
@@ -253,4 +253,4 @@ t_color3 = (solve color_inv1 Color) == Nothing
 
 test_color = and [t_color1, t_color2, t_color3] 
 
-test_all = and [test_isValid, test_basic, test_cross, test_color]
+test_all = and [test_isValidSDK, test_basic, test_cross, test_color]
