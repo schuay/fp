@@ -1,6 +1,10 @@
-import Data.List (sort)
+import Data.List (sort, (\\), nub)
 
 {- Terms: bare skyline = skyline without visibility infos -}
+
+sl0 = [[0,2,1,0],[2,0,0,1],[1,0,0,2],[0,1,2,0]]
+sl1 = compVisibility [[10,20,30,40],[20,30,40,10],[30,40,10,20],[40,10,20,30]]
+sl2 = [[0,5,4,3,2,1,0],[5,0,0,0,0,0,1],[4,0,0,0,0,0,2],[3,0,0,0,0,0,2],[2,0,0,0,0,0,2],[1,0,0,0,0,0,2],[0,1,2,2,2,2,0]]
 
 {- skyline -}
 
@@ -73,9 +77,11 @@ visline :: Row -> Row
 visline s = [lvis s] ++ s ++ [rvis s]
 
 {- Transposes a matrix -}
+
 transpose :: [[a]] -> [[a]]
-transpose m = [ map ( !! i) m | i <- [ 0 .. cols - 1 ] ]
+transpose m = [ map (!! i) m | i <- [ 0 .. s ] ]
     where (rows,cols) = dim m
+          s = cols - 1
 
 {- standardize sets corner cells to 0 -}
 
@@ -96,6 +102,60 @@ isValidSL m = and [ isValidSLSize m,
 
 {- 1b -}
 
+initialRow :: Integer -> Row
+initialRow n = map (* 10) [1 .. n]
+
+perms :: Row -> [Row]
+perms [] = [[]]
+perms r = [ x:xs | x <- r, xs <- perms (r \\ [x])]
+
+{- Takes 2 rows and returns whether all nonzero positions match.
+ - rowsMatch [10,20,40,30] [0,20,0,0] -> True -}
+
+rowsMatch :: Row -> Row -> Bool
+rowsMatch x y = length x == length y &&
+                and [ a == b | (a,b) <- zip x y, a /= 0, b /= 0 ]
+
+{- Takes a template row,
+ - and returns a list of valid candidate rows.
+ - candidateRows [3,10,0,0,1] -> [[3,10,20,30,1]]  -}
+candidateRows :: Row -> [Row]
+candidateRows t = filter (rowsMatch t) (map visline rows)
+    where rows = perms (initialRow (fromIntegral $ length bt))
+          bt = mid t
+
+replaceRow :: Int -> Skyline -> Row -> Skyline
+replaceRow i m r = (take i m) ++ [r] ++ (drop (i + 1) m)
+
+candidates :: Skyline -> [Skyline]
+candidates m = filter isValidSL cs
+    where
+    cs = map (\x -> [head m] ++ x ++ [last m]) (candidates' m 1)
+
+{- Takes a template matrix and a row index. Returns a list of candidate
+ - matrices which fulfill the horizontal visibility requirements.
+ - NOTE: vertical visibility requirements are NOT checked, and the
+ - returned matrices are missing the vertical visibility rows! -}
+
+candidates' :: Skyline -> Int -> [Skyline]
+candidates' m i
+    | i > len = [[]]
+    | otherwise = concat [ map (r:) (next r) | r <- candidateRows t ]
+    where
+    {- Last row is visibility info, and we are only interested in
+     - skyline rows -}
+    len = length m - 2
+    t = row m i
+
+    {- Returns all possible combinations of next lines. Terminates if m is invalid -}
+    next r = if not (mvalid m) then [] else candidates' (replaceRow i m r) (i + 1)
+
+    {- Returns whether columns of stripped partial matrix contain no duplicates -}
+    mvalid = (all noDups) . mid . transpose . (take i) . mid
+
+    {- Takes a row and returns True if it contains no duplicate items -}
+    noDups r = (length $ nub r) == (length r)
+
 {- Given a skyline *without* visibility information (an n x n matrix),
  - calculates the visibility and returns the skyline *with* visibility
  - infos. If the given skyline is not valid, it is returned without change. -}
@@ -110,7 +170,11 @@ compVisibility m = standardize $ map visline colvis
  - or Nothing otherwise. Empty fields are set to 0. All existing skyline infos
  - need to be valid. Maximal size of passed skylines is 5 x 5. -}
 
--- buildSkyscrapers :: Skyline -> Maybe Skyline
+buildSkyscrapers :: Skyline -> Maybe Skyline
+buildSkyscrapers m
+    | cs == [] = Nothing
+    | otherwise = Just (head cs)
+    where cs = candidates m
 
 {- sudoku -}
 
