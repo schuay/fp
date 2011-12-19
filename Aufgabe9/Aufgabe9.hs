@@ -9,6 +9,7 @@ sl2 = [[0,5,4,3,2,1,0],[5,0,0,0,0,0,1],[4,0,0,0,0,0,2],[3,0,0,0,0,0,2],[2,0,0,0,
 {- skyline -}
 
 type Row = [Integer]
+type Col = [Integer]
 type Skyline = [Row]
 
 {- 1a -}
@@ -22,22 +23,31 @@ col m i = map (!! i) m
 cell :: [[a]] -> Int -> Int -> a
 cell m i j = row (col m j) i
 
+{- Given a Skyline, returns a list of all rows -}
+
+allRows :: Skyline -> [Row]
 allRows = id
 
+{- Given a Skyline, returns a list of all cols -}
+
+allCols :: Skyline -> [Col]
 allCols m = map (col m) [ 0 .. (length m) - 1 ]
 
 {- Returns (0,0) if matrix is empty or invalid; (rows,cols) otherwise -}
 
 dim :: [[a]] -> (Int, Int)
-dim [] = (0,0)
-dim [[]] = (0,0)
-dim m | not colsequal = (0,0)
-      | otherwise = (rows, head collens)
+dim m | rows == 0 || cols == 0 = (0,0)
+      | not colsequal = (0,0)
+      | otherwise = (rows, cols)
     where rows = length m
           collens = map length m
+          cols = head collens
           colsequal = and $ zipWith (==) collens (tail collens)
 
+mid :: [a] -> [a]
 mid = tail . init
+
+{- Given a Skyline, returns a bare skyline -}
 
 stripVisibility :: [[a]] -> [[a]]
 stripVisibility = (map mid) . mid
@@ -79,7 +89,7 @@ visline s = [lvis s] ++ s ++ [rvis s]
 {- Transposes a matrix -}
 
 transpose :: [[a]] -> [[a]]
-transpose m = [ map (!! i) m | i <- [ 0 .. s ] ]
+transpose m = [ col m i | i <- [ 0 .. s ] ]
     where (rows,cols) = dim m
           s = cols - 1
 
@@ -97,8 +107,8 @@ standardize m = [ standardize' $ head m ] ++ (mid m) ++
 
 isValidSL :: Skyline -> Bool
 isValidSL m = and [ isValidSLSize m,
-                  allLinesValid m,
-                  (standardize m) == (compVisibility (stripVisibility m)) ]
+                    allLinesValid m,
+                    (standardize m) == (compVisibility (stripVisibility m)) ]
 
 {- 1b -}
 
@@ -121,8 +131,8 @@ rowsMatch x y = length x == length y &&
  - candidateRows [3,10,0,0,1] -> [[3,10,20,30,1]]  -}
 candidateRows :: Row -> [Row]
 candidateRows t = filter (rowsMatch t) (map visline rows)
-    where rows = perms (initialRow (fromIntegral $ length bt))
-          bt = mid t
+    where rows = perms (initialRow len)
+          len = fromIntegral $ length $ mid t
 
 replaceRow :: Int -> Skyline -> Row -> Skyline
 replaceRow i m r = (take i m) ++ [r] ++ (drop (i + 1) m)
@@ -140,7 +150,7 @@ candidates m = filter isValidSL cs
 candidates' :: Skyline -> Int -> [Skyline]
 candidates' m i
     | i > len = [[]]
-    | otherwise = concat [ map (r:) (next r) | r <- candidateRows t ]
+    | otherwise = [ r:s | r <- candidateRows t, s <- next r ]
     where
     {- Last row is visibility info, and we are only interested in
      - skyline rows -}
