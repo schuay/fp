@@ -174,8 +174,11 @@ candidates' m i
  - infos. If the given skyline is not valid, it is returned without change. -}
 
 compVisibility :: Skyline -> Skyline
-compVisibility m = standardize $ map visline colvis
+compVisibility m
+    | a < 2 || b < 2 || (not $ allLinesValid m) = m
+    | otherwise = standardize $ map visline colvis
     where colvis = (transpose . map visline . transpose) m
+          (a,b) = dim m
 
 {- 1c -}
 
