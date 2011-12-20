@@ -1,10 +1,12 @@
 import Data.List (sort, (\\), nub)
+import Data.Maybe (listToMaybe)
 
 {- Terms: bare skyline = skyline without visibility infos -}
 
 sl0 = [[0,2,1,0],[2,0,0,1],[1,0,0,2],[0,1,2,0]]
 sl1 = compVisibility [[10,20,30,40],[20,30,40,10],[30,40,10,20],[40,10,20,30]]
 sl2 = [[0,5,4,3,2,1,0],[5,0,0,0,0,0,1],[4,0,0,0,0,0,2],[3,0,0,0,0,0,2],[2,0,0,0,0,0,2],[1,0,0,0,0,0,2],[0,1,2,2,2,2,0]]
+sl3 = [[0,2,2,3,1,3,0],[2,0,0,0,0,0,2],[1,0,0,0,0,0,4],[2,0,0,0,0,0,3],[3,0,0,0,0,0,2],[3,0,0,0,0,0,1],[0,3,2,2,4,1,0]]
 
 {- skyline -}
 
@@ -187,9 +189,7 @@ compVisibility m
  - need to be valid. Maximal size of passed skylines is 5 x 5. -}
 
 buildSkyscrapers :: Skyline -> Maybe Skyline
-buildSkyscrapers m
-    | cs == [] = Nothing
-    | otherwise = Just (head cs)
+buildSkyscrapers m = listToMaybe cs
     where cs = candidates m
 
 -- 2
