@@ -65,10 +65,12 @@ isValidSLLine :: Row -> Bool
 isValidSLLine r = and $ zipWith (==) values (sort r)
     where values = map (* 10) [ 1 .. ]
 
+{- Takes a bare skyline, returns whether all rows and cols
+ - contain all values -}
+
 allLinesValid :: Skyline -> Bool
 allLinesValid m = and $ map isValidSLLine allLines
-    where allLines = (allRows s) ++ (allCols s)
-          s = stripVisibility m
+    where allLines = (allRows m) ++ (allCols m)
 
 {- lvis,rvis,visline expect bare skyline rows -}
 
@@ -107,8 +109,9 @@ standardize m = [ standardize' $ head m ] ++ (mid m) ++
 
 isValidSL :: Skyline -> Bool
 isValidSL m = and [ isValidSLSize m,
-                    allLinesValid m,
-                    (standardize m) == (compVisibility (stripVisibility m)) ]
+                    allLinesValid s,
+                    (standardize m) == (compVisibility s) ]
+    where s = stripVisibility m
 
 {- 1b -}
 
