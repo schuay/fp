@@ -225,14 +225,10 @@ getSub a i
 	pos = fromIntegral ((i `mod` 3) * 3)
 
 getDia1 :: Sudoku -> [Integer]
-getDia1 [] = []
-getDia1 (a:as) = a!!0 : (getDia1 next)
-  where next = [ tail x | x<-as ]
+getDia1 s = [ r !! i | (i,r) <- zip [0..] s ]
 
 getDia2 :: Sudoku -> [Integer]
-getDia2 [] = []
-getDia2 (a:as) = (last a) : (getDia2 next)
-  where next = [ init x | x<-as ]
+getDia2 = getDia1 . (map reverse)
 
 getColorF :: Sudoku -> Integer -> [Integer]
 getColorF [] _ = []
