@@ -214,6 +214,15 @@ sudokuSubCount = sudokuLen `div` sudokuSubLen
 validInd = [0 .. sudokuLen - 1]
 validNum = [1 .. 9]
 
+sd0 = [[9,1,6,0,0,4,0,7,2],
+                [8,0,0,6,2,0,0,5,0],
+                [5,0,0,0,0,8,9,3,0],
+                [0,6,0,0,0,0,2,0,0],
+                [0,0,0,2,0,7,0,0,0],
+                [0,0,5,0,0,0,0,9,0],
+                [0,9,7,8,0,0,0,0,3],
+                [0,8,0,0,7,6,0,0,9],
+                [4,5,0,1,0,0,6,8,7]]
 
 part :: Scale -> Int -> Int
 part s i
@@ -228,13 +237,43 @@ check19 :: Row -> Bool
 check19 x = not $ dupes filt
     where filt = filter (`elem` validNum) x
 
+splitByN :: Int -> [a] -> [[a]]
+splitByN _ [] = []
+splitByN n l = (take n l) : splitByN n (drop n l)
+
+zipList :: [[a]] -> [[a]]
+zipList l = [ map (!! i) l | i <- [0 .. len]]
+    where minlen = minimum $ map length l
+          len = minlen - 1
+
+getSubsAsList :: Sudoku -> [[Integer]]
+getSubsAsList = map concat . getSubs
+
+getSubs :: Sudoku -> [[Row]]
+getSubs m = concat $ map zipList colsplit
+    where
+    {- [[1,2,3,4...],
+     -  [1,2,3,4...],
+     -  [...],
+     -  [...],
+     -  ...]
+     - -> each row is split into sections
+     - [[[1,2,3],[4...]],
+     -  [[1,2,3],[4,..]],
+     -  [...],
+     -  [...],
+     -  ...]  -}
+    rowsplit = map (splitByN sudokuSubLen) m
+     {- -> group the row section lists by columns
+     - [[[[1,2,3],[4...]],
+     -   [[1,2,3],[4,..]],
+     -   [...]],
+     -   [[...],
+     -   ...]  -}
+    colsplit = splitByN sudokuSubLen rowsplit
+
 getSub :: Sudoku -> Int -> [Integer]
-getSub a i
-  | length a < 7 = []
-  | otherwise    = [cRow!!pos] ++ [cRow!!(1+pos)] ++ [cRow!!(2+pos)] ++ (getSub next i)
-  where cRow = a !! part 3 i
-	next = tail a
-	pos = fromIntegral ((i `mod` 3) * 3)
+getSub m i = getSubsAsList m !! i
 
 getDia1 :: Sudoku -> [Integer]
 getDia1 s = [ r !! i | (i,r) <- zip [0..] s ]
@@ -243,11 +282,7 @@ getDia2 :: Sudoku -> [Integer]
 getDia2 = getDia1 . (map reverse)
 
 getColorF :: Sudoku -> Int -> [Integer]
-getColorF [] _ = []
-getColorF a i = [cRow!!pos] ++ [cRow!!(3+pos)] ++ [cRow!!(6+pos)] ++ (getColorF next i)
-  where cRow = a !! part 1 i
-        next = drop 3 a
-	pos = fromIntegral (i `mod` 3)
+getColorF m i = map (!! i) (getSubsAsList m)
 
 -- a
 
