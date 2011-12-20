@@ -206,8 +206,6 @@ type RowInd = Int
 type ColInd = Int
 type Position = (RowInd,ColInd)
 
-type Scale = Int
-
 sudokuLen = 9
 validInd = [0 .. sudokuLen - 1]
 validNum = [1 .. 9]
@@ -288,7 +286,7 @@ getColorF :: Sudoku -> Int -> [Integer]
 getColorF m i = map (!! i) (getSubsAsList m)
 
 getColorFs :: Sudoku -> [[Integer]]
-getColorFs m = map (getColorF m) validInd
+getColorFs m = map (getColorF m . fromIntegral) validInd
 
 -- a
 
@@ -349,7 +347,8 @@ solvePos a (r,c) v
   | otherwise           = firstJust (map (tryPos a (r,c) v) allowed)
   where allowed = allowedChars a (r,c) v
         cur = cell a r c
-        validPosition = r `elem` validInd && c `elem` validInd
+        (ri,ci) = (fromIntegral r, fromIntegral c)
+        validPosition = ri `elem` validInd && ci `elem` validInd
 
 solve :: Sudoku -> Variant -> Maybe Sudoku
 solve a v
