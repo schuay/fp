@@ -204,6 +204,13 @@ type Position = (RowInd,ColInd)
 
 type Scale = Integer
 
+sudokuLen = 9
+sudokuSubLen = 3
+sudokuSubCount = sudokuLen `div` sudokuSubLen
+validInd = [0 .. sudokuLen - 1]
+validNum = [1 .. 9]
+
+
 part :: Scale -> Integer -> Integer
 part s i
   | i < 3     = 0*s
@@ -236,9 +243,6 @@ getColorF a i = [cRow!!pos] ++ [cRow!!(3+pos)] ++ [cRow!!(6+pos)] ++ (getColorF 
   where cRow = a!! (fromIntegral . part 1) i
         next = drop 3 a
 	pos = fromIntegral (i `mod` 3)
-
-validInd = [0..8]
-validNum = [1..9]
 
 -- a
 
