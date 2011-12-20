@@ -202,11 +202,11 @@ type Sudoku = [Row]
 
 data Variant = Basic | Cross | Color deriving (Eq,Show)
 
-type RowInd = Integer
-type ColInd = Integer
+type RowInd = Int
+type ColInd = Int
 type Position = (RowInd,ColInd)
 
-type Scale = Integer
+type Scale = Int
 
 sudokuLen = 9
 sudokuSubLen = 3
@@ -215,7 +215,7 @@ validInd = [0 .. sudokuLen - 1]
 validNum = [1 .. 9]
 
 
-part :: Scale -> Integer -> Integer
+part :: Scale -> Int -> Int
 part s i
   | i < 3     = 0*s
   | i < 6     = 1*s
@@ -228,11 +228,11 @@ check19 :: Row -> Bool
 check19 x = not $ dupes filt
     where filt = filter (`elem` validNum) x
 
-getSub :: Sudoku -> Integer -> [Integer]
+getSub :: Sudoku -> Int -> [Integer]
 getSub a i
   | length a < 7 = []
   | otherwise    = [cRow!!pos] ++ [cRow!!(1+pos)] ++ [cRow!!(2+pos)] ++ (getSub next i)
-  where cRow = a!! (fromIntegral . part 3) i
+  where cRow = a !! part 3 i
 	next = tail a
 	pos = fromIntegral ((i `mod` 3) * 3)
 
@@ -242,10 +242,10 @@ getDia1 s = [ r !! i | (i,r) <- zip [0..] s ]
 getDia2 :: Sudoku -> [Integer]
 getDia2 = getDia1 . (map reverse)
 
-getColorF :: Sudoku -> Integer -> [Integer]
+getColorF :: Sudoku -> Int -> [Integer]
 getColorF [] _ = []
 getColorF a i = [cRow!!pos] ++ [cRow!!(3+pos)] ++ [cRow!!(6+pos)] ++ (getColorF next i)
-  where cRow = a!! (fromIntegral . part 1) i
+  where cRow = a !! part 1 i
         next = drop 3 a
 	pos = fromIntegral (i `mod` 3)
 
@@ -275,26 +275,26 @@ getSpecial a (r,c) Cross
 getSpecial a (r,c) Color = getColorF a color
   where color = (r `mod` 3) * 3 + (c `mod` 3)
 
-allowedChars :: Sudoku -> Position -> Variant -> [Integer]
-allowedChars a (r,c) v = [ x | x <- validNum, allowed x ]
+allowedChars :: Sudoku -> Position -> Variant -> [Int]
+allowedChars a (r,c) v = [ fromIntegral x | x <- validNum, allowed x ]
   where cRow = row a (fromIntegral r)
         cCol = col a (fromIntegral c)
-	cSub = getSub a ((part 3 r) + (part 1 c))
-	cSpecial = getSpecial a (r,c) v
-	allowed x = (not.or) (map (elem x) [cRow, cCol, cSub, cSpecial])
+        cSub = getSub a ((part 3 r) + (part 1 c))
+        cSpecial = getSpecial a (r,c) v
+        allowed x = (not.or) (map (elem x) [cRow, cCol, cSub, cSpecial])
 
 firstJust :: [Maybe a] -> Maybe a
 firstJust [] = Nothing
 firstJust (Nothing:xs) = firstJust xs
 firstJust (x:xs) = x
 
-replace :: Sudoku -> Position -> Integer -> Sudoku
+replace :: Sudoku -> Position -> Int -> Sudoku
 replace (a:as) (r,c) i
   | r == 0 = replaceInRow a c i : as
   | otherwise = a : replace as (r-1,c) i
-  where replaceInRow :: Row -> Integer -> Integer -> Row
+  where replaceInRow :: Row -> Int -> Int -> Row
         replaceInRow (r:rs) c i
-	  | c == 0 = i : rs
+	  | c == 0 = toInteger i : rs
 	  | otherwise = r : replaceInRow rs (c-1) i
 
 nextPos :: Position -> Position
@@ -302,7 +302,7 @@ nextPos (r,c)
   | c < 8     = (r,c+1)
   | otherwise = (r+1,0)
 
-tryPos :: Sudoku -> Position -> Variant -> Integer -> Maybe Sudoku
+tryPos :: Sudoku -> Position -> Variant -> Int -> Maybe Sudoku
 tryPos a p v i = solvePos nextA (nextPos p) v
   where nextA = replace a p i
 
@@ -312,7 +312,7 @@ solvePos a (r,c) v
   | cur `elem` validNum = solvePos a (nextPos (r,c)) v
   | otherwise           = firstJust (map (tryPos a (r,c) v) allowed)
   where allowed = allowedChars a (r,c) v
-        cur = (a!!(fromIntegral r))!!(fromIntegral c)
+        cur = cell a r c
 	validPosition = r `elem` validInd && c `elem` validInd
 
 solve :: Sudoku -> Variant -> Maybe Sudoku
