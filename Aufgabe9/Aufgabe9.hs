@@ -1,5 +1,5 @@
 import Data.List (sort, (\\), nub, union)
-import Data.Maybe (listToMaybe)
+import Data.Maybe (listToMaybe, isNothing)
 
 {- Terms: bare skyline = skyline without visibility infos -}
 
@@ -139,8 +139,8 @@ candidateRows t = filter (rowsMatch t) (map visline rows)
     where rows = perms (initialRow len)
           len = fromIntegral $ length $ mid t
 
-replaceRow :: Int -> Skyline -> Row -> Skyline
-replaceRow i m r = (take i m) ++ [r] ++ (drop (i + 1) m)
+replace :: [a] -> Int -> a -> [a]
+replace m i r = (take i m) ++ [r] ++ (drop (i + 1) m)
 
 candidates :: Skyline -> [Skyline]
 candidates m = filter isValidSL cs
@@ -167,7 +167,7 @@ candidates' m i
     t = row m i
 
     {- Returns all possible combinations of next lines. Terminates if m is invalid -}
-    next r = if not (mvalid m) then [] else candidates' (replaceRow i m r) (i + 1)
+    next r = if not (mvalid m) then [] else candidates' (replace m i r) (i + 1)
 
     {- Returns whether columns of stripped partial matrix contain no duplicates -}
     mvalid = (all nodupes) . mid . transpose . (take i) . mid
@@ -311,7 +311,7 @@ getSpecial _ (_,_) Basic = []
 getSpecial a (r,c) Cross
   | r == 4 && c == 4 = getDia1 a `union` getDia2 a
   | r == c           = getDia1 a
-  | c == 8 - r       = getDia2 a
+  | c == 9 - 1 - r   = getDia2 a
   | otherwise        = []
 getSpecial a p Color = getColorF a (posToColor p)
 
@@ -323,27 +323,24 @@ allowedChars a p@(r,c) v = map fromIntegral allowed
         allowed = validNum \\ disallowed
 
 firstJust :: [Maybe a] -> Maybe a
-firstJust [] = Nothing
-firstJust (Nothing:xs) = firstJust xs
-firstJust (x:xs) = x
+firstJust l = firstJust' $ dropWhile isNothing l
+    where firstJust' (x:_) = x
+          firstJust' _ = Nothing
 
-replace :: Sudoku -> Position -> Int -> Sudoku
-replace (a:as) (r,c) i
-  | r == 0 = replaceInRow a c i : as
-  | otherwise = a : replace as (r-1,c) i
-  where replaceInRow :: Row -> Int -> Int -> Row
-        replaceInRow (r:rs) c i
-	  | c == 0 = toInteger i : rs
-	  | otherwise = r : replaceInRow rs (c-1) i
+replaceCell :: Sudoku -> Position -> Int -> Sudoku
+replaceCell m (r,c) n = replace m r newrow
+    where newrow = replace (row m r) c (fromIntegral n)
+
+{- Note: last position does not wrap around on purpose -}
 
 nextPos :: Position -> Position
-nextPos (r,c)
-  | c < 8     = (r,c+1)
-  | otherwise = (r+1,0)
+nextPos (r,c) = (nextind `div` 9, nextind `mod` 9)
+    where ind = r * 9 + c
+          nextind = ind + 1
 
 tryPos :: Sudoku -> Position -> Variant -> Int -> Maybe Sudoku
 tryPos a p v i = solvePos nextA (nextPos p) v
-  where nextA = replace a p i
+  where nextA = replaceCell a p i
 
 solvePos :: Sudoku -> Position -> Variant -> Maybe Sudoku
 solvePos a (r,c) v
@@ -352,7 +349,7 @@ solvePos a (r,c) v
   | otherwise           = firstJust (map (tryPos a (r,c) v) allowed)
   where allowed = allowedChars a (r,c) v
         cur = cell a r c
-	validPosition = r `elem` validInd && c `elem` validInd
+        validPosition = r `elem` validInd && c `elem` validInd
 
 solve :: Sudoku -> Variant -> Maybe Sudoku
 solve a v
