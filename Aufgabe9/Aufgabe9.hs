@@ -1,4 +1,4 @@
-import Data.List (sort, (\\), nub)
+import Data.List (sort, (\\), nub, union)
 import Data.Maybe (listToMaybe)
 
 {- Terms: bare skyline = skyline without visibility infos -}
@@ -209,8 +209,6 @@ type Position = (RowInd,ColInd)
 type Scale = Int
 
 sudokuLen = 9
-sudokuSubLen = 3
-sudokuSubCount = sudokuLen `div` sudokuSubLen
 validInd = [0 .. sudokuLen - 1]
 validNum = [1 .. 9]
 
@@ -223,12 +221,6 @@ sd0 = [[9,1,6,0,0,4,0,7,2],
                 [0,9,7,8,0,0,0,0,3],
                 [0,8,0,0,7,6,0,0,9],
                 [4,5,0,1,0,0,6,8,7]]
-
-part :: Scale -> Int -> Int
-part s i
-  | i < 3     = 0*s
-  | i < 6     = 1*s
-  | otherwise = 2*s
 
 {- Checks if a row (filtered to valid numbers)
  - contains any duplicate elements -}
@@ -263,17 +255,25 @@ getSubs m = concat $ map zipList colsplit
      -  [...],
      -  [...],
      -  ...]  -}
-    rowsplit = map (splitByN sudokuSubLen) m
+    rowsplit = map (splitByN 3) m
      {- -> group the row section lists by columns
      - [[[[1,2,3],[4...]],
      -   [[1,2,3],[4,..]],
      -   [...]],
      -   [[...],
      -   ...]  -}
-    colsplit = splitByN sudokuSubLen rowsplit
+    colsplit = splitByN 3 rowsplit
 
 getSub :: Sudoku -> Int -> [Integer]
 getSub m i = getSubsAsList m !! i
+
+posToSub :: Position -> Int
+posToSub (r,c) = subr * 3 + subc
+    where (subr,subc) = (r `div` 3, c `div` 3)
+
+posToColor :: Position -> Int
+posToColor (r,c) = colr * 3 + colc
+    where (colr, colc) = (r `mod` 3, c `mod` 3)
 
 getDia1 :: Sudoku -> [Integer]
 getDia1 s = [ r !! i | (i,r) <- zip [0..] s ]
@@ -281,42 +281,46 @@ getDia1 s = [ r !! i | (i,r) <- zip [0..] s ]
 getDia2 :: Sudoku -> [Integer]
 getDia2 = getDia1 . (map reverse)
 
+getDias :: Sudoku -> [[Integer]]
+getDias m = [getDia1 m, getDia2 m]
+
 getColorF :: Sudoku -> Int -> [Integer]
 getColorF m i = map (!! i) (getSubsAsList m)
+
+getColorFs :: Sudoku -> [[Integer]]
+getColorFs m = map (getColorF m) validInd
 
 -- a
 
 isValidSDKSpecial :: Sudoku -> Variant -> Bool
 isValidSDKSpecial _ Basic = True
-isValidSDKSpecial a Cross = (check19 . getDia1) a && (check19 . getDia2) a
-isValidSDKSpecial a Color = and (map (check19 . getColorF a) validInd)
+isValidSDKSpecial m Cross = and $ map check19 (getDias m)
+isValidSDKSpecial m Color = and $ map check19 (getColorFs m)
 
 isValidSDK :: Sudoku -> Variant -> Bool
-isValidSDK a v = rowsOk && colsOk && subsOk && specialOk v
-  where rowsOk = and (map (check19 . row a . fromIntegral) validInd)
-        colsOk = and (map (check19 . col a . fromIntegral) validInd)
-        subsOk = and (map (check19 . getSub a) validInd)
-	specialOk = isValidSDKSpecial a
+isValidSDK a v = rowsOk && colsOk && subsOk && specialOk
+  where rowsOk = and $ map check19 (allRows a)
+        colsOk = and $ map check19 (allCols a)
+        subsOk = and $ map check19 (getSubsAsList a)
+        specialOk = isValidSDKSpecial a v
 
 -- b
 
 getSpecial :: Sudoku -> Position -> Variant -> [Integer]
 getSpecial _ (_,_) Basic = []
 getSpecial a (r,c) Cross
-  | r == 4 && c == 4 = getDia1 a ++ getDia2 a
+  | r == 4 && c == 4 = getDia1 a `union` getDia2 a
   | r == c           = getDia1 a
   | c == 8 - r       = getDia2 a
   | otherwise        = []
-getSpecial a (r,c) Color = getColorF a color
-  where color = (r `mod` 3) * 3 + (c `mod` 3)
+getSpecial a p Color = getColorF a (posToColor p)
 
 allowedChars :: Sudoku -> Position -> Variant -> [Int]
-allowedChars a (r,c) v = [ fromIntegral x | x <- validNum, allowed x ]
-  where cRow = row a (fromIntegral r)
-        cCol = col a (fromIntegral c)
-        cSub = getSub a ((part 3 r) + (part 1 c))
-        cSpecial = getSpecial a (r,c) v
-        allowed x = (not.or) (map (elem x) [cRow, cCol, cSub, cSpecial])
+allowedChars a p@(r,c) v = map fromIntegral allowed
+  where cSub = getSub a (posToSub p)
+        cSpecial = getSpecial a p v
+        disallowed = concat [row a r, col a c, cSub, cSpecial]
+        allowed = validNum \\ disallowed
 
 firstJust :: [Maybe a] -> Maybe a
 firstJust [] = Nothing
