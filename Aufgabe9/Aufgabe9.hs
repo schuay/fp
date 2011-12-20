@@ -216,13 +216,6 @@ check19 x = (as == rest) && (check19 rest)
   where (a:as) = [ y | y<-x, y>0, y<=9 ]
         rest = [ z | z<-as, z/=a ]
 
-getRow :: Sudoku -> RowInd -> Row
-getRow a i = a!!(fromIntegral i)
-
-getCol :: Sudoku -> ColInd -> [Integer]
-getCol [] _ = []
-getCol (a:as) i = a!!(fromIntegral i) : (getCol as i)
-
 getSub :: Sudoku -> Integer -> [Integer]
 getSub a i
   | length a < 7 = []
@@ -260,8 +253,8 @@ isValidSDKSpecial a Color = and (map (check19 . getColorF a) validInd)
 
 isValidSDK :: Sudoku -> Variant -> Bool
 isValidSDK a v = rowsOk && colsOk && subsOk && specialOk v
-  where rowsOk = and (map (check19 . getRow a) validInd)
-        colsOk = and (map (check19 . getCol a) validInd)
+  where rowsOk = and (map (check19 . row a . fromIntegral) validInd)
+        colsOk = and (map (check19 . col a . fromIntegral) validInd)
         subsOk = and (map (check19 . getSub a) validInd)
 	specialOk = isValidSDKSpecial a
 
@@ -274,13 +267,13 @@ getSpecial a (r,c) Cross
   | r == c           = getDia1 a
   | c == 8 - r       = getDia2 a
   | otherwise        = []
-getSpecial a (r,c) Color = getColorF a col
-  where col = (r `mod` 3) * 3 + (c `mod` 3)
+getSpecial a (r,c) Color = getColorF a color
+  where color = (r `mod` 3) * 3 + (c `mod` 3)
 
 allowedChars :: Sudoku -> Position -> Variant -> [Integer]
 allowedChars a (r,c) v = [ x | x <- validNum, allowed x ]
-  where cRow = getRow a r
-        cCol = getCol a c
+  where cRow = row a (fromIntegral r)
+        cCol = col a (fromIntegral c)
 	cSub = getSub a ((part 3 r) + (part 1 c))
 	cSpecial = getSpecial a (r,c) v
 	allowed x = (not.or) (map (elem x) [cRow, cCol, cSub, cSpecial])
