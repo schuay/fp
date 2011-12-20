@@ -147,6 +147,10 @@ candidates m = filter isValidSL cs
     where
     cs = map (\x -> [head m] ++ x ++ [last m]) (candidates' m 1)
 
+dupes :: Eq a => [a] -> Bool
+dupes [] = False
+dupes (x:xs) = x `elem` xs || dupes xs
+
 {- Takes a template matrix and a row index. Returns a list of candidate
  - matrices which fulfill the horizontal visibility requirements.
  - NOTE: vertical visibility requirements are NOT checked, and the
@@ -166,10 +170,10 @@ candidates' m i
     next r = if not (mvalid m) then [] else candidates' (replaceRow i m r) (i + 1)
 
     {- Returns whether columns of stripped partial matrix contain no duplicates -}
-    mvalid = (all noDups) . mid . transpose . (take i) . mid
+    mvalid = (all nodupes) . mid . transpose . (take i) . mid
 
     {- Takes a row and returns True if it contains no duplicate items -}
-    noDups r = (length $ nub r) == (length r)
+    nodupes = not . dupes
 
 {- Given a skyline *without* visibility information (an n x n matrix),
  - calculates the visibility and returns the skyline *with* visibility
@@ -217,11 +221,12 @@ part s i
   | i < 6     = 1*s
   | otherwise = 2*s
 
-check19 :: [Integer] -> Bool
-check19 [] = True
-check19 x = (as == rest) && (check19 rest)
-  where (a:as) = [ y | y<-x, y>0, y<=9 ]
-        rest = [ z | z<-as, z/=a ]
+{- Checks if a row (filtered to valid numbers)
+ - contains any duplicate elements -}
+
+check19 :: Row -> Bool
+check19 x = not $ dupes filt
+    where filt = filter (`elem` validNum) x
 
 getSub :: Sudoku -> Integer -> [Integer]
 getSub a i
