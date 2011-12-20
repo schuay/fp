@@ -210,6 +210,13 @@ sudokuLen = 9
 validInd = [0 .. sudokuLen - 1]
 validNum = [1 .. 9]
 
+{- Sub-Sudokus and colors are numbered as follows:
+ - 0|1|2
+ - -+-+-
+ - 3|4|5
+ - -+-+-
+ - 6|7|8 -}
+
 sd0 = [[9,1,6,0,0,4,0,7,2],
                 [8,0,0,6,2,0,0,5,0],
                 [5,0,0,0,0,8,9,3,0],
@@ -265,10 +272,14 @@ getSubs m = concat $ map zipList colsplit
 getSub :: Sudoku -> Int -> [Integer]
 getSub m i = getSubsAsList m !! i
 
+{- Determines the index of the correct Sub-Sudoku for
+ - the given position -}
 posToSub :: Position -> Int
 posToSub (r,c) = subr * 3 + subc
     where (subr,subc) = (r `div` 3, c `div` 3)
 
+{- Determines the index of the correct Color-List for
+ - the given position -}
 posToColor :: Position -> Int
 posToColor (r,c) = colr * 3 + colc
     where (colr, colc) = (r `mod` 3, c `mod` 3)
@@ -290,6 +301,8 @@ getColorFs m = map (getColorF m . fromIntegral) validInd
 
 -- a
 
+{- Checks if the Sudoku meets the requirements of the given
+ - Variant -}
 isValidSDKSpecial :: Sudoku -> Variant -> Bool
 isValidSDKSpecial _ Basic = True
 isValidSDKSpecial m Cross = and $ map check19 (getDias m)
@@ -304,6 +317,8 @@ isValidSDK a v = rowsOk && colsOk && subsOk && specialOk
 
 -- b
 
+{- Get a list of the numbers we have to regard for the given
+ - position in this Sudoku Variant. -}
 getSpecial :: Sudoku -> Position -> Variant -> [Integer]
 getSpecial _ (_,_) Basic = []
 getSpecial a (r,c) Cross
@@ -313,6 +328,9 @@ getSpecial a (r,c) Cross
   | otherwise        = []
 getSpecial a p Color = getColorF a (posToColor p)
 
+{- Get a list of numbers which can be placed at the given Position
+ - without violating the constraints given by a Sudoku of variant v.
+ - (Some of these possibilities may result in an unsolvable Sudoku.) -}
 allowedChars :: Sudoku -> Position -> Variant -> [Int]
 allowedChars a p@(r,c) v = map fromIntegral allowed
   where cSub = getSub a (posToSub p)
@@ -336,14 +354,19 @@ nextPos (r,c) = (nextind `div` 9, nextind `mod` 9)
     where ind = r * 9 + c
           nextind = ind + 1
 
+-- Place i at the given position and try to solve this new Sudoku.
 tryPos :: Sudoku -> Position -> Variant -> Int -> Maybe Sudoku
 tryPos a p v i = solvePos nextA (nextPos p) v
   where nextA = replaceCell a p i
 
 solvePos :: Sudoku -> Position -> Variant -> Maybe Sudoku
 solvePos a (r,c) v
+  -- we reached the end of the Sudoku and filled all previous positions -> done
   | not validPosition   = Just a
+  -- current position already contains a valid value, continue with the next
   | cur `elem` validNum = solvePos a (nextPos (r,c)) v
+  {- Try to solve the Sudoku for each possible value at the given position
+   - and return the first solved instance or Nothing. -}
   | otherwise           = firstJust (map (tryPos a (r,c) v) allowed)
   where allowed = allowedChars a (r,c) v
         cur = cell a r c
